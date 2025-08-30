@@ -17,27 +17,23 @@ Simulation Ready: Includes a "Reset" feature for judges to easily clear all data
 🛠️ Technology Stack
 Frontend: HTML5, Tailwind CSS, JavaScript (ES6+)
 
-Backend: Node.js, Express.js
+Backend: Node.js, Express.js, Cors.js, etc
 
-Database: MySQL
+API: Express-Validator.js, Express-Rate-Verifier.js, etc
+
+Database: MySQL[Railway host]
 
 Blockchain: Solidity, Ethers.js
 
 🚀 Getting Started
-Follow these instructions to get the project up and running on your local machine for demonstration and testing purposes.
+Steps used in creation:
 
 Prerequisites
-Node.js and npm: Download Here
+Node.js and npm:
 
-MySQL: A running MySQL server instance. You can use a local installation or a cloud service.
+MySQL: A running MySQL server instance. Used a cloud service.
 
-(Optional) Ganache: For running a local Ethereum blockchain. Download Here
-
-Installation & Setup
-Clone the repository:
-
-git clone <your-repository-url>
-cd <repository-folder>
+Ganache: For running a local Ethereum blockchain.
 
 Install backend dependencies:
 
@@ -55,24 +51,4 @@ Configure Environment Variables:
 
 Create a file named .env in the root of the project.
 
-Copy the contents below into it and fill in your specific details.
-
-.env Template:
-
-# --- Database Configuration ---
-# Example: mysql://user:password@host:port/database_name
-DATABASE_URL="mysql://root:your_password@localhost:3306/hydrogen_subsidy"
-
-# --- Blockchain Configuration (Optional) ---
-# RPC URL from Ganache or your preferred testnet (e.g., Sepolia)
-RPC_URL="[http://127.0.0.1:7545](http://127.0.0.1:7545)"
-
-# The private key of the account you used to deploy the contract (from Ganache)
-PRIVATE_KEY="your_ganache_account_private_key"
-
-# The address of the deployed SubsidyAutomator.sol smart contract
-CONTRACT_ADDRESS="your_deployed_contract_address"
-
-Run the Server:
-
-npm start
+This file contains all the sensitive information like the passwords and keys used in a programme.
