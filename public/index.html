@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Green Hydrogen Subsidy Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+        :root {
+            --bg-primary: #f8fafc; --bg-secondary: #ffffff; --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a; --text-secondary: #475569;
+            --accent-green: #10b981; --accent-blue: #3b82f6;
+            --border-color: #e2e8f0; --shadow-color: rgba(0,0,0,0.07);
+        }
+        html.dark {
+            --bg-primary: #0d1a2e; --bg-secondary: #172a46; --bg-tertiary: #0f213d;
+            --text-primary: #e2e8f0; --text-secondary: #94a3b8;
+            --accent-green: #34d399; --accent-blue: #60a5fa;
+            --border-color: #334155; --shadow-color: rgba(0,0,0,0.2);
+        }
+        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); transition: background-color 0.3s, color 0.3s; }
+        .page-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1.5rem; }
+        .page-section { display: none; width: 100%; animation: fadeIn 0.5s ease-in-out; }
+        .page-section:target, body:not(:has(:target)) > main > .page-section:first-of-type { display: block; }
+        html:has(:target) .page-section:first-of-type:not(:target) { display: none; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .card { 
+            background-color: var(--bg-secondary); box-shadow: 0 10px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
+            border: 1px solid var(--border-color);
+        }
+        .wave-container { position: fixed; bottom: 0; left: 0; width: 100%; height: 25vh; z-index: -1; overflow: hidden; pointer-events: none; }
+        .parallax > use { animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite; }
+        .parallax > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; }
+        .parallax > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; }
+        .parallax > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; }
+        .parallax > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; }
+        @keyframes move-forever { 0% { transform: translate3d(-90px,0,0); } 100% { transform: translate3d(85px,0,0); } }
+        .wave-fill { fill: var(--accent-green); }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        .control-button {
+            background-size: 200% 100%;
+            transition: background-position 0.5s;
+        }
+        .control-button:hover { background-position: -100% 0; }
+    </style>
+    <script>
+        try {
+            const theme = localStorage.getItem('theme') || 'dark';
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+        } catch (e) { document.documentElement.classList.add('dark'); }
+    </script>
+</head>
+<body class="bg-[var(--bg-primary)] text-[var(--text-primary)]">
+
+    <div class="wave-container">
+        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
+            <defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" /></defs>
+            <g class="parallax">
+                <use xlink:href="#gentle-wave" x="48" y="0" class="wave-fill" opacity="0.7" />
+                <use xlink:href="#gentle-wave" x="48" y="3" class="wave-fill" opacity="0.5" />
+                <use xlink:href="#gentle-wave" x="48" y="5" class="wave-fill" opacity="0.3" />
+                <use xlink:href="#gentle-wave" x="48" y="7" class="wave-fill" />
+            </g>
+        </svg>
+    </div>
+
+    <main>
+        <section id="login" class="page-section">
+            <div class="page-container">
+                <div class="w-full max-w-md card rounded-2xl p-8 space-y-6">
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent-green)] to-[var(--accent-blue)]">Subsidy Automation Portal</h1>
+                        <p class="text-[var(--text-secondary)] mt-2">Green Hydrogen Initiative</p>
+                    </div>
+                    <form id="login-form" class="space-y-4">
+                        <select id="role-select" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)]">
+                            <option value="government">Government Official</option>
+                            <option value="producer">Producer / Vendor</option>
+                            <option value="auditor">Auditor</option>
+                        </select>
+                        <input type="email" id="login-email" placeholder="Email Address" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                        <input type="password" id="login-password" placeholder="Password" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition">Login</button>
+                    </form>
+                    <div class="text-center text-sm">
+                        <p class="text-[var(--text-secondary)]">Don't have an account? 
+                            <a href="#signup" class="font-semibold text-[var(--accent-green)] hover:underline">Sign Up</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="signup" class="page-section">
+            <div class="page-container">
+                <div class="w-full max-w-md card rounded-2xl p-8 space-y-6 relative">
+                    <div id="theme-switcher-7" class="absolute top-6 right-6"></div>
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold">Create Account</h1>
+                        <p class="text-[var(--text-secondary)] mt-2">Join the Green Hydrogen Initiative</p>
+                    </div>
+                    <form id="signup-form" class="space-y-4">
+                        <input type="text" id="signup-name" required placeholder="Full Name" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                        <input type="email" id="signup-email" required placeholder="Email Address" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                        <select id="signup-role-select" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)]">
+                            <option value="" disabled selected>Select Your Role</option>
+                            <option value="government">Government Official</option>
+                            <option value="producer">Producer / Vendor</option>
+                            <option value="auditor">Auditor</option>
+                        </select>
+                        <input type="password" id="signup-password" required placeholder="Password" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                        <input type="password" id="signup-confirm-password" required placeholder="Confirm Password" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition">Create Account</button>
+                        <a href="#login" class="block w-full text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">Back to Login</a>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="government-dashboard" class="page-section">
+            <div class="page-container">
+                <div class="w-full max-w-5xl card rounded-2xl p-8 space-y-6 relative">
+                    <div class="absolute top-6 right-6 flex items-center space-x-4">
+                        <div id="theme-switcher-1"></div>
+                        <a href="#login" class="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--accent-green)] transition">Logout</a>
+                    </div>
+                    <div class="text-center">
+                        <h1 class="text-4xl font-bold">Government Dashboard</h1>
+                        <p class="text-[var(--text-secondary)] mt-2">Team "Error 404" // Green Hydrogen Initiative</p>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 space-y-4">
+                            <h2 class="text-xl font-semibold">Registered Vendors</h2>
+                            <div id="vendor-list" class="bg-[var(--bg-tertiary)] h-72 rounded-lg p-4 overflow-y-auto space-y-3 custom-scrollbar"></div>
+                        </div>
+                        <div class="md:col-span-1 space-y-4">
+                             <h2 class="text-xl font-semibold">System Controls</h2>
+                            <a href="#add-vendor" class="control-button block text-center text-white font-bold py-4 px-4 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">Register New Vendor</a>
+                            <a href="#team" class="control-button block text-center text-white font-bold py-4 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600">Meet The Team</a>
+                            <button id="reset-button" class="control-button w-full text-white font-bold py-4 px-4 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600">Reset Simulation</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="producer-dashboard" class="page-section">
+             <div class="page-container">
+                <div class="w-full max-w-4xl card rounded-2xl p-8 space-y-6 relative">
+                     <div class="absolute top-6 right-6 flex items-center space-x-4">
+                        <div id="theme-switcher-2"></div>
+                        <a href="#login" class="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--accent-green)] transition">Logout</a>
+                    </div>
+                    <h1 class="text-3xl font-bold text-center">Producer Dashboard</h1>
+                    <div id="producer-vendor-select" class="text-center">
+                        <label for="vendor-select" class="block mb-2">Select Your Project to View Progress</label>
+                        <select id="vendor-select" class="w-full max-w-sm mx-auto bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)]"></select>
+                    </div>
+                    <div id="producer-progress-view" class="hidden space-y-6">
+                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center bg-[var(--bg-tertiary)] p-4 rounded-lg">
+                            <div><p class="text-sm text-[var(--text-secondary)]">Production</p><p class="text-2xl font-bold"><span id="producer-current-progress">0</span> / <span id="producer-milestone">0</span></p></div>
+                            <div><p class="text-sm text-[var(--text-secondary)]">Milestone</p><p class="text-2xl font-bold text-[var(--accent-green)]"><span id="producer-percentage">0</span>%</p></div>
+                            <div><p class="text-sm text-[var(--text-secondary)]">Reward</p><p class="text-2xl font-bold"><span id="producer-reward">0</span> ETH</p></div>
+                            <div><p class="text-sm text-[var(--text-secondary)]">Status</p><p class="text-lg font-bold uppercase"><span id="producer-status"></span></p></div>
+                        </div>
+                        <div id="producer-payout-container" class="hidden pt-6 text-center border-t border-[var(--border-color)]">
+                             <button id="payout-btn" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-6 rounded-lg transition">Initiate Payout</button>
+                        </div>
+                    </div>
+                </div>
+             </div>
+        </section>
+
+        <section id="auditor-dashboard" class="page-section">
+            <div class="page-container">
+                <div class="w-full max-w-4xl card rounded-2xl p-8 space-y-6 relative">
+                     <div class="absolute top-6 right-6 flex items-center space-x-4">
+                        <div id="theme-switcher-3"></div>
+                        <a href="#login" class="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--accent-green)] transition">Logout</a>
+                    </div>
+                    <h1 class="text-3xl font-bold text-center">Audit Trail</h1>
+                    <p class="text-center text-[var(--text-secondary)]">A read-only log of all vendor activities.</p>
+                    <div id="audit-log" class="bg-[var(--bg-tertiary)] h-96 rounded-lg p-4 font-mono text-sm overflow-y-auto space-y-2 custom-scrollbar"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="add-vendor" class="page-section">
+            <div class="page-container">
+                 <div class="w-full max-w-md card rounded-2xl p-8 space-y-6 relative">
+                    <div id="theme-switcher-4" class="absolute top-6 right-6"></div>
+                    <h1 class="text-2xl font-bold text-center">Vendor Registration</h1>
+                    <form id="add-vendor-form" class="space-y-4">
+                        <input type="text" id="vendor-name" required placeholder="Vendor Name" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                        <input type="text" id="wallet-address" required placeholder="Wallet Address (0x...)" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                        <div class="flex space-x-4">
+                            <input type="number" id="milestone-goal" required placeholder="Milestone Goal" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                            <input type="number" id="reward-amount" step="0.01" required placeholder="Reward (ETH)" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
+                        </div>
+                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition">Submit Registration</button>
+                        <a href="#government-dashboard" class="block w-full text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </section>
+        <section id="team" class="page-section">
+             <div class="page-container">
+                <div class="w-full max-w-4xl card rounded-2xl p-8 space-y-6 relative">
+                    <div id="theme-switcher-5" class="absolute top-6 right-6"></div>
+                    <h1 class="text-3xl font-bold text-center">Meet The Innovators</h1>
+                    <p class="text-center text-[var(--text-secondary)] mt-2">Team "Error 404"</p>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
+                        <div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Mahir Shah</p></div>
+                        <div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Daksh Shah</p></div>
+                        <div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Shashvat Patel</p></div>
+                        <div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Dhruvil Patel</p></div>
+                    </div>
+                    <div class="pt-6 border-t border-[var(--border-color)]">
+                        <a href="#government-dashboard" class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition">Back to Dashboard</a>
+                    </div>
+                </div>
+             </div>
+        </section>
+        <section id="cash-out" class="page-section">
+            <div class="page-container">
+                <div class="w-full max-w-md card rounded-2xl p-8 space-y-6 relative">
+                    <div id="theme-switcher-6" class="absolute top-6 right-6"></div>
+                    <h1 class="text-2xl font-bold text-center">Subsidy Payout</h1>
+                    <div class="bg-[var(--bg-tertiary)] p-6 rounded-lg text-center">
+                        <p class="text-sm text-[var(--text-secondary)]">Amount for <span id="payout-vendor-name" class="font-bold text-[var(--text-primary)]"></span></p>
+                        <p class="text-4xl font-bold my-2"><span id="payout-amount">0</span> ETH</p>
+                    </div>
+                    <form id="cash-out-form" class="space-y-4">
+                        <input type="text" id="payout-wallet" readonly class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] cursor-not-allowed">
+                        <label class="flex items-center text-sm cursor-pointer">
+                            <input type="checkbox" id="payout-confirm" class="h-4 w-4 bg-[var(--bg-tertiary)] border-[var(--border-color)] rounded text-[var(--accent-green)] focus:ring-[var(--accent-green)]">
+                            <span class="ml-3 text-[var(--text-secondary)]">I confirm the withdrawal of the subsidy.</span>
+                        </label>
+                        <button id="payout-submit" type="submit" disabled class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">Initiate Withdrawal</button>
+                        <a href="#producer-dashboard" class="block w-full text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const API_BASE_URL = 'http://localhost:3000';
+            let vendors = [];
+            let selectedVendor = null;
+
+            const initTheme = () => {
+                const isDarkMode = document.documentElement.classList.contains('dark');
+                const icon = isDarkMode ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+                document.querySelectorAll('[id^="theme-switcher-"]').forEach(el => {
+                    el.innerHTML = `<button class="theme-toggle p-2 rounded-full bg-[var(--bg-tertiary)] hover:bg-[var(--border-color)] transition">${icon}</button>`;
+                });
+                document.querySelectorAll('.theme-toggle').forEach(btn => btn.addEventListener('click', () => {
+                    const isDark = document.documentElement.classList.toggle('dark');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    initTheme(); // Re-render toggles
+                }));
+            };
+
+            const fetchVendors = async () => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/vendors`);
+                    if (response.ok) vendors = await response.json();
+                } catch (error) { console.error("Failed to fetch vendors", error); }
+            };
+
+            // --- Role Specific Setups ---
+            const setupGovernmentView = () => {
+                const vendorListEl = document.getElementById('vendor-list');
+                const resetButton = document.getElementById('reset-button');
+                vendorListEl.innerHTML = '';
+                if (vendors.length > 0) {
+                    vendors.forEach(v => {
+                        const div = document.createElement('div');
+                        div.className = "bg-[var(--bg-secondary)] p-3 rounded-lg flex justify-between items-center border border-[var(--border-color)]";
+                        div.innerHTML = `<div><p class="font-bold">${v.name}</p><p class="text-xs text-[var(--text-secondary)]">${v.wallet_address}</p></div><span class="text-sm font-semibold ${v.is_paid ? 'text-blue-500' : 'text-yellow-400'}">${v.is_paid ? 'PAID' : 'ACTIVE'}</span>`;
+                        vendorListEl.appendChild(div);
+                    });
+                } else {
+                    vendorListEl.innerHTML = `<p class="text-[var(--text-secondary)]">No vendors registered yet.</p>`;
+                }
+                resetButton.addEventListener('click', async () => {
+                     try {
+                        const response = await fetch(`${API_BASE_URL}/reset`, { method: 'POST' });
+                        if(response.ok) { vendors = []; setupGovernmentView(); }
+                    } catch (error) { console.error("Failed to reset.", error); }
+                });
+            };
+
+            const setupProducerView = () => {
+                const selectEl = document.getElementById('vendor-select');
+                const progressView = document.getElementById('producer-progress-view');
+                selectEl.innerHTML = '<option selected disabled>-- Select Your Project --</option>';
+                vendors.forEach(v => {
+                    const option = document.createElement('option');
+                    option.value = v.id;
+                    option.textContent = v.name;
+                    selectEl.appendChild(option);
+                });
+                selectEl.addEventListener('change', async (e) => {
+                    const vendorId = e.target.value;
+                    selectedVendor = vendors.find(v => v.id == vendorId);
+                    if (!selectedVendor) return;
+                    
+                    const response = await fetch(`${API_BASE_URL}/vendors/${vendorId}/progress`);
+                    const data = await response.json();
+                    
+                    document.getElementById('producer-current-progress').textContent = data.totalProgress || 0;
+                    document.getElementById('producer-milestone').textContent = selectedVendor.milestone_goal;
+                    document.getElementById('producer-percentage').textContent = Math.round(((data.totalProgress || 0)/selectedVendor.milestone_goal)*100);
+                    document.getElementById('producer-reward').textContent = selectedVendor.reward_amount;
+                    const statusEl = document.getElementById('producer-status');
+                    const payoutContainer = document.getElementById('producer-payout-container');
+                    payoutContainer.classList.add('hidden');
+
+                    if(selectedVendor.is_paid) { statusEl.textContent = 'PAID'; statusEl.className = 'text-blue-500'; }
+                    else if ((data.totalProgress || 0) >= selectedVendor.milestone_goal) { statusEl.textContent = 'PAYOUT READY'; statusEl.className = 'text-green-500'; payoutContainer.classList.remove('hidden'); }
+                    else { statusEl.textContent = 'ACTIVE'; statusEl.className = 'text-yellow-400'; }
+                    
+                    progressView.classList.remove('hidden');
+                });
+                 document.getElementById('payout-btn').addEventListener('click', () => {
+                     if(!selectedVendor) return;
+                     document.getElementById('payout-vendor-name').textContent = selectedVendor.name;
+                     document.getElementById('payout-amount').textContent = selectedVendor.reward_amount;
+                     document.getElementById('payout-wallet').value = selectedVendor.wallet_address;
+                     window.location.hash = '#cash-out';
+                 });
+            };
+
+            const setupAuditorView = () => {
+                const logEl = document.getElementById('audit-log');
+                logEl.innerHTML = '';
+                if(vendors.length > 0) {
+                    vendors.forEach(v => {
+                        const entry = document.createElement('p');
+                        entry.innerHTML = `<span class="opacity-50">${new Date(v.created_at).toLocaleString()}</span> &gt; <span class="text-green-500">REGISTER</span> &gt; ${v.name} created.`;
+                        logEl.appendChild(entry);
+                        if(v.is_paid) {
+                             const paidEntry = document.createElement('p');
+                             paidEntry.innerHTML = `<span class="opacity-50">${new Date().toLocaleString()}</span> &gt; <span class="text-blue-500">PAYOUT</span> &gt; ${v.name} processed ${v.reward_amount} ETH.`;
+                             logEl.appendChild(paidEntry);
+                        }
+                    });
+                } else {
+                    logEl.innerHTML = `<p class="text-[var(--text-secondary)]">No activity to display.</p>`;
+                }
+            };
+            
+            // --- MAIN LOGIC ---
+            const init = async () => {
+                initTheme();
+                
+                // LOGIN FORM
+                document.getElementById('login-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const email = document.getElementById('login-email').value;
+                    const password = document.getElementById('login-password').value;
+                    const role = document.getElementById('role-select').value;
+                    
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/login`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ email, password, role })
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            localStorage.setItem('userRole', data.user.role);
+                            window.location.hash = `#${data.user.role}-dashboard`;
+                        } else {
+                            const err = await response.json();
+                            alert(`Login Failed: ${err.message}`);
+                        }
+                    } catch (error) {
+                        alert('Error connecting to the server.');
+                    }
+                });
+
+                // SIGNUP FORM
+                document.getElementById('signup-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const name = document.getElementById('signup-name').value;
+                    const email = document.getElementById('signup-email').value;
+                    const role = document.getElementById('signup-role-select').value;
+                    const password = document.getElementById('signup-password').value;
+                    const confirmPassword = document.getElementById('signup-confirm-password').value;
+
+                    if (password !== confirmPassword) {
+                        alert("Passwords do not match.");
+                        return;
+                    }
+                    if (!role) {
+                        alert("Please select a role.");
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/signup`, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name, email, role, password })
+                        });
+                        
+                        if (response.ok) {
+                            alert('Sign up successful! Please log in.');
+                            window.location.hash = '#login';
+                        } else {
+                            const err = await response.json();
+                            alert(`Error: ${err.message || "Could not sign up."}`);
+                        }
+                    } catch (error) {
+                        console.error("Sign up failed:", error);
+                        alert("An error occurred during sign up.");
+                    }
+                });
+
+                // ADD VENDOR FORM
+                document.getElementById('add-vendor-form').addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const formData = {
+                        name: document.getElementById('vendor-name').value, walletAddress: document.getElementById('wallet-address').value,
+                        milestoneGoal: parseInt(document.getElementById('milestone-goal').value), rewardAmount: parseFloat(document.getElementById('reward-amount').value),
+                    };
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/add-vendor`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
+                        if (response.ok) { window.location.hash = '#government-dashboard'; } 
+                        else { const err = await response.json(); alert(`Error: ${err.message || "Please check your input values."}`); }
+                    } catch (error) { console.error("Failed to add vendor", error); }
+                });
+
+                // CASHOUT FORM
+                const cashOutForm = document.getElementById('cash-out-form');
+                const payoutConfirmCheck = document.getElementById('payout-confirm');
+                const payoutSubmitBtn = document.getElementById('payout-submit');
+                payoutConfirmCheck.addEventListener('change', () => { payoutSubmitBtn.disabled = !payoutConfirmCheck.checked; });
+                cashOutForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    if (!selectedVendor) return;
+                    payoutSubmitBtn.disabled = true; payoutSubmitBtn.textContent = 'Processing...';
+                    try {
+                        const response = await fetch(`${API_BASE_URL}/vendors/${selectedVendor.id}/payout`, { method: 'POST' });
+                        if(response.ok) {
+                            window.location.hash = '#producer-dashboard';
+                        } else { alert("Server failed to process payout."); }
+                    } catch(error) { alert("Connection error during payout."); }
+                    finally { payoutSubmitBtn.textContent = 'Initiate Withdrawal'; }
+                });
+
+                // ROUTING
+                const route = async () => {
+                    await fetchVendors();
+                    
+                    const hash = window.location.hash || '#login';
+                    const userRole = localStorage.getItem('userRole');
+
+                    const publicPages = ['#login', '#signup'];
+                    const isProtectedPage = !publicPages.includes(hash);
+
+                    if (isProtectedPage && !userRole) {
+                        window.location.hash = '#login';
+                        return; 
+                    }
+
+                    if (hash === '#login') {
+                        localStorage.removeItem('userRole');
+                    }
+                    
+                    document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
+                    const targetSection = document.querySelector(hash);
+
+                    if(targetSection) {
+                         targetSection.style.display = 'block';
+                    } else {
+                        document.getElementById('login').style.display = 'block';
+                    }
+                    
+                    if (hash === '#government-dashboard') setupGovernmentView();
+                    if (hash === '#producer-dashboard') setupProducerView();
+                    if (hash === '#auditor-dashboard') setupAuditorView();
+                };
+
+                window.addEventListener('hashchange', route);
+                route(); // Initial route call
+            };
+
+            init();
+        });
+    </script>
+</body>
+</html>

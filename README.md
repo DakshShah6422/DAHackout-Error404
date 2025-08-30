@@ -1,0 +1,2 @@
+# Automation of Green Hydrogen Subsidy For Government
+This project creates a clear and automated digital system to distribute government subsidies for green hydrogen projects. It ensures that funds are released quickly and fairly as soon as certain goals are met.
