@@ -1,9 +1,17 @@
 {
+  "name": "green-hydrogen-server",
+  "version": "1.0.0",
+  "description": "Backend server for the Green Hydrogen Subsidy Portal.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
-    "dotenv": "^17.2.1",
-    "ethers": "^6.15.0",
-    "express": "^5.1.0"
+    "dotenv": "^16.4.5",
+    "ethers": "^6.13.1",
+    "express": "^4.19.2",
+    "mysql2": "^3.14.3"
   }
 }

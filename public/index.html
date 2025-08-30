@@ -3,499 +3,716 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Automated Green Hydrogen Subsidy Platform</title>
+    <title>Green Hydrogen Subsidy Portal | Government of India</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
         :root {
-            --bg-primary: #f8fafc; --bg-secondary: #ffffff; --bg-tertiary: #f1f5f9;
-            --text-primary: #0f172a; --text-secondary: #475569;
-            --accent-green: #10b981; --accent-blue: #3b82f6;
-            --border-color: #e2e8f0; --shadow-color: rgba(0,0,0,0.07);
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --accent-green: #10b981;
+            --accent-blue: #2563eb;
+            --border-color: #e2e8f0;
+            --shadow-color-light: rgba(0,0,0,0.05);
+            --shadow-color-dark: rgba(0,0,0,0.1);
         }
         html.dark {
-            --bg-primary: #0d1a2e; --bg-secondary: #172a46; --bg-tertiary: #0f213d;
-            --text-primary: #e2e8f0; --text-secondary: #94a3b8;
-            --accent-green: #34d399; --accent-blue: #60a5fa;
-            --border-color: #334155; --shadow-color: rgba(0,0,0,0.2);
+            --bg-primary: #0b1120;
+            --bg-secondary: #172134;
+            --bg-tertiary: #1e293b;
+            --text-primary: #e2e8f0;
+            --text-secondary: #94a3b8;
+            --accent-green: #34d399;
+            --accent-blue: #60a5fa;
+            --border-color: #334155;
+            --shadow-color-light: rgba(0,0,0,0.1);
+            --shadow-color-dark: rgba(0,0,0,0.2);
         }
-        body { font-family: 'Poppins', sans-serif; background-color: var(--bg-primary); color: var(--text-primary); transition: background-color 0.3s, color 0.3s; }
-        .page-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 1.5rem; }
-        .page-section { display: none; width: 100%; animation: fadeIn 0.5s ease-in-out; }
-        .page-section:target, body:not(:has(:target)) > main > .page-section:first-of-type { display: block; }
-        html:has(:target) .page-section:first-of-type:not(:target) { display: none; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .card { 
-            background-color: var(--bg-secondary); box-shadow: 0 10px 25px -5px var(--shadow-color), 0 8px 10px -6px var(--shadow-color);
-            border: 1px solid var(--border-color);
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color 0.3s, color 0.3s;
         }
-        .wave-container { position: fixed; bottom: 0; left: 0; width: 100%; height: 25vh; z-index: -1; overflow: hidden; pointer-events: none; }
-        .parallax > use { animation: move-forever 25s cubic-bezier(.55,.5,.45,.5) infinite; }
-        .parallax > use:nth-child(1) { animation-delay: -2s; animation-duration: 7s; }
-        .parallax > use:nth-child(2) { animation-delay: -3s; animation-duration: 10s; }
-        .parallax > use:nth-child(3) { animation-delay: -4s; animation-duration: 13s; }
-        .parallax > use:nth-child(4) { animation-delay: -5s; animation-duration: 20s; }
-        @keyframes move-forever { 0% { transform: translate3d(-90px,0,0); } 100% { transform: translate3d(85px,0,0); } }
-        .wave-fill { fill: var(--accent-green); }
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
-        .control-button {
-            background-size: 200% 100%;
-            transition: background-position 0.5s;
+        #background-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
         }
-        .control-button:hover { background-position: -100% 0; }
-    </style>
-    <script>
-        try {
-            const theme = localStorage.getItem('theme') || 'dark';
-            document.documentElement.classList.toggle('dark', theme === 'dark');
-        } catch (e) { document.documentElement.classList.add('dark'); }
-    </script>
-</head>
-<body class="bg-[var(--bg-primary)] text-[var(--text-primary)]">
+        .bubble {
+            position: absolute;
+            bottom: -200px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 70% 30%, hsla(220, 80%, 80%, 0.4), hsla(220, 80%, 50%, 0.1) 80%);
+            box-shadow: inset 0 0 10px hsla(220, 80%, 100%, 0.3);
+            animation: bubble-rise linear infinite;
+            opacity: 0;
+        }
+        html.dark .bubble {
+            background: radial-gradient(circle at 70% 30%, hsla(220, 80%, 70%, 0.2), hsla(220, 90%, 40%, 0.1) 80%);
+            box-shadow: inset 0 0 10px hsla(220, 80%, 80%, 0.1);
+        }
 
-    <div class="wave-container">
-        <svg class="waves" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 24 150 28" preserveAspectRatio="none" shape-rendering="auto">
-            <defs><path id="gentle-wave" d="M-160 44c30 0 58-18 88-18s 58 18 88 18 58-18 88-18 58 18 88 18 v44h-352z" /></defs>
-            <g class="parallax">
-                <use xlink:href="#gentle-wave" x="48" y="0" class="wave-fill" opacity="0.7" />
-                <use xlink:href="#gentle-wave" x="48" y="3" class="wave-fill" opacity="0.5" />
-                <use xlink:href="#gentle-wave" x="48" y="5" class="wave-fill" opacity="0.3" />
-                <use xlink:href="#gentle-wave" x="48" y="7" class="wave-fill" />
-            </g>
-        </svg>
+        .section-hidden { display: none !important; }
+        .modal-hidden { display: none !important; }
+        .modal-overlay {
+            background-color: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(4px);
+        }
+        .modal-content { animation: slideInUp 0.3s ease-out; }
+        .card {
+            background-color: var(--bg-secondary);
+            box-shadow: 0 4px 6px -1px var(--shadow-color-light), 0 2px 4px -2px var(--shadow-color-light);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 15px -3px var(--shadow-color-dark), 0 4px 6px -4px var(--shadow-color-dark);
+        }
+        .btn { transition: all 0.2s ease-in-out; }
+        .btn-primary { background-image: linear-gradient(to right, var(--accent-blue), #3b82f6); }
+        .btn-primary:hover {
+            box-shadow: 0 4px 15px -3px var(--accent-blue);
+            transform: translateY(-2px);
+        }
+        .btn:disabled { cursor: not-allowed; opacity: 0.6; }
+        .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+        .fade-in-up { animation: fadeInUp 0.5s ease-out forwards; opacity: 0; }
+        .animate-in { opacity: 0; transition: opacity 0.5s, transform 0.5s; transform: translateY(20px); }
+        .animated { opacity: 1; transform: translateY(0); }
+        #toast-container { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 100; display: flex; flex-direction: column; gap: 0.75rem; }
+        .toast {
+            display: flex; align-items: center; padding: 1rem 1.25rem; border-radius: 0.75rem; color: white;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05);
+            transform: translateX(calc(100% + 1.5rem)); opacity: 0;
+            animation: slideInToast 0.5s forwards, fadeOutToast 0.5s 4.5s forwards;
+        }
+        .toast-success { background-color: #10b981; }
+        .toast-error { background-color: #ef4444; }
+        .toast-info { background-color: #3b82f6; }
+        .toast svg { margin-right: 0.75rem; }
+        .spinner {
+            width: 1.25rem; height: 1.25rem; border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            animation: spin 0.8s linear infinite;
+        }
+        .skeleton { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; background-color: var(--bg-tertiary); }
+        .progress-bar { background-color: var(--bg-tertiary); border-radius: 9999px; overflow: hidden; }
+        .progress-bar-inner {
+            height: 100%; background-color: var(--accent-green); border-radius: 9999px;
+            transition: width 0.5s ease-out;
+        }
+        html.dark select {
+            background-color: var(--bg-tertiary);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        html.dark select option {
+            background-color: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        @keyframes bubble-rise {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 0.7; }
+            50% { transform: translateY(-50vh) translateX(5vw); }
+            90% { opacity: 0.7; }
+            100% { transform: translateY(-110vh) translateX(-5vw); opacity: 0; }
+        }
+        @keyframes slideInUp { from { opacity: 0; transform: translateY(30px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideInToast { to { transform: translateX(0); opacity: 1; } }
+        @keyframes fadeOutToast { from { opacity: 1; } to { opacity: 0; transform: translateX(calc(100% + 1.5rem)); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="background-animation"></div>
+    <div id="toast-container"></div>
+
+    <div id="landing-page-section">
+        <header class="fixed top-0 left-0 right-0 z-50 bg-[var(--bg-primary)]/80 backdrop-blur-sm border-b border-[var(--border-color)]">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <svg class="h-8 w-8 text-[var(--accent-green)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
+                    <h1 class="text-xl font-bold">GreenHydrogen<span class="text-[var(--accent-green)]">.gov</span></h1>
+                </div>
+                <nav class="hidden md:flex items-center space-x-8">
+                    <a href="#features" class="font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">Features</a>
+                    <a href="#how-it-works" class="font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">Process</a>
+                    <a href="#team" class="font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">Team</a>
+                    <a href="#contact" class="font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">Contact</a>
+                </nav>
+                <div class="flex items-center space-x-2">
+                    <button data-modal-target="login-modal" class="btn btn-secondary text-sm font-semibold px-4 py-2 rounded-lg">Login</button>
+                    <button data-modal-target="signup-modal" class="btn btn-primary text-sm text-white font-semibold px-4 py-2 rounded-lg">Sign Up</button>
+                    <div id="theme-switcher-main" class="ml-2"></div>
+                </div>
+            </div>
+        </header>
+
+        <main class="pt-24">
+            <section class="container mx-auto px-6 py-24 text-center">
+                <h2 class="text-5xl md:text-6xl font-extrabold leading-tight fade-in-up" style="animation-delay: 0.1s;">
+                    Powering a <span class="bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent-green)] to-emerald-500">Greener Future</span>,
+                    <br class="hidden md:block">
+                    One Subsidy at a Time.
+                </h2>
+                <p class="mt-6 max-w-2xl mx-auto text-lg text-[var(--text-secondary)] fade-in-up" style="animation-delay: 0.2s;">
+                    Our blockchain-powered platform ensures a transparent, secure, and automated distribution of government subsidies for the green hydrogen sector.
+                </p>
+                <div class="mt-8 flex justify-center space-x-4 fade-in-up" style="animation-delay: 0.3s;">
+                    <button data-modal-target="signup-modal" class="btn btn-primary text-white font-semibold px-8 py-3 rounded-lg">Get Started</button>
+                </div>
+            </section>
+
+            <section id="features" class="py-20 bg-[var(--bg-tertiary)]">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12">
+                        <h3 class="text-sm font-bold uppercase text-[var(--accent-blue)] tracking-wider">Core Features</h3>
+                        <h4 class="text-3xl font-bold mt-2">A Platform Built on Trust</h4>
+                    </div>
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="card p-8 rounded-xl text-center items-center flex flex-col animate-in"><svg class="h-12 w-12 text-[var(--accent-green)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.286zm0 13.036h.008v.008h-.008v-.008z" /></svg><h5 class="text-xl font-bold mt-4">Blockchain Security</h5><p class="mt-2 text-[var(--text-secondary)]">Every transaction is recorded on an immutable ledger, ensuring complete transparency and preventing fraud.</p></div>
+                        <div class="card p-8 rounded-xl text-center items-center flex flex-col animate-in" style="transition-delay: 100ms;"><svg class="h-12 w-12 text-[var(--accent-green)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 12a9 9 0 1118 0 9 9 0 01-18 0zM4.5 9.75v.008h.008V9.75H4.5zm.75 3.75v.008h.008v-.008H5.25zm2.25-.75v.008h.008V12.75H7.5z" /></svg><h5 class="text-xl font-bold mt-4">Automated Payouts</h5><p class="mt-2 text-[var(--text-secondary)]">Smart contracts automatically disburse funds when milestones are met, eliminating delays and human error.</p></div>
+                        <div class="card p-8 rounded-xl text-center items-center flex flex-col animate-in" style="transition-delay: 200ms;"><svg class="h-12 w-12 text-[var(--accent-green)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 7.5h1.5m-1.5 3h1.5m-7.5 3h7.5m-7.5 3h7.5m3-9h3.375c.621 0 1.125.504 1.125 1.125V18a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 18V6.75c0-.621.504-1.125 1.125-1.125H9.75" /></svg><h5 class="text-xl font-bold mt-4">Verifiable Audits</h5><p class="mt-2 text-[var(--text-secondary)]">A crystal-clear audit trail is available for all stakeholders, fostering trust and accountability in the subsidy lifecycle.</p></div>
+                    </div>
+                </div>
+            </section>
+            
+            <section id="how-it-works" class="py-20">
+                <div class="container mx-auto px-6">
+                    <div class="text-center mb-12"><h3 class="text-sm font-bold uppercase text-[var(--accent-blue)] tracking-wider">The Process</h3><h4 class="text-3xl font-bold mt-2">A Simple Path to Funding</h4></div>
+                    <div class="max-w-4xl mx-auto grid md:grid-cols-3 gap-4 text-center relative">
+                        <div class="absolute top-1/2 left-0 w-full h-0.5 bg-[var(--border-color)] hidden md:block"></div>
+                        <div class="relative p-6 animate-in"><div class="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[var(--accent-blue)] text-white flex items-center justify-center font-bold border-4 border-[var(--bg-primary)]">1</div><h5 class="text-xl font-semibold mt-8">Register</h5><p class="mt-2 text-[var(--text-secondary)]">Government officials register vendors, creating their login and setting project goals on the blockchain.</p></div>
+                        <div class="relative p-6 animate-in" style="transition-delay: 100ms;"><div class="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[var(--accent-blue)] text-white flex items-center justify-center font-bold border-4 border-[var(--bg-primary)]">2</div><h5 class="text-xl font-semibold mt-8">Produce & Progress</h5><p class="mt-2 text-[var(--text-secondary)]">Vendors log in, track their production milestones, and see their subsidy status in real-time.</p></div>
+                        <div class="relative p-6 animate-in" style="transition-delay: 200ms;"><div class="absolute -top-3 left-1/2 -translate-x-1/2 w-8 h-8 rounded-full bg-[var(--accent-blue)] text-white flex items-center justify-center font-bold border-4 border-[var(--bg-primary)]">3</div><h5 class="text-xl font-semibold mt-8">Receive Funds</h5><p class="mt-2 text-[var(--text-secondary)]">Once milestones are verified and met, the smart contract automatically pays the subsidy to the vendor's wallet.</p></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="team" class="py-20 bg-[var(--bg-tertiary)]">
+                <div class="container mx-auto px-6 space-y-6 animate-in">
+                   <h1 class="text-3xl font-bold text-center">Meet The Innovators</h1>
+                   <p class="text-center text-[var(--text-secondary)] mt-2">Team "Error 404"</p>
+                   <div class="max-w-4xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
+                       <div class="text-center card p-6"><p class="font-bold text-lg">Mahir Shah</p></div>
+                       <div class="text-center card p-6"><p class="font-bold text-lg">Daksh Shah</p></div>
+                       <div class="text-center card p-6"><p class="font-bold text-lg">Shashvat Patel</p></div>
+                       <div class="text-center card p-6"><p class="font-bold text-lg">Dhruvil Patel</p></div>
+                   </div>
+                </div>
+            </section>
+
+            <footer id="contact" class="py-20 border-t border-[var(--border-color)]">
+                <div class="container mx-auto px-6 text-center">
+                    <h4 class="text-3xl font-bold">Have Questions?</h4>
+                    <p class="mt-2 text-[var(--text-secondary)]">Contact our team to learn more about the initiative.</p>
+                    <div class="mt-6"><p class="font-semibold">📧 error404@greenhydrogen.gov.in | 📞 +91 7383654894</p></div>
+                    <p class="mt-8 text-sm text-[var(--text-secondary)]">© 2025 Green Hydrogen Portal Initiative | Team "Error 404"</p>
+                </div>
+            </footer>
+        </main>
     </div>
 
-    <main>
-        <section id="login" class="page-section">
-            <div class="page-container">
-                <div class="w-full max-w-md card rounded-2xl p-8 space-y-6">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--accent-green)] to-[var(--accent-blue)]">Subsidy Automation Portal</h1>
-                        <p class="text-[var(--text-secondary)] mt-2">Green Hydrogen Initiative</p>
-                    </div>
-                    <form id="login-form" class="space-y-4">
-                        <select id="role-select" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)]">
-                            <option value="government">Government Official</option>
-                            <option value="producer">Producer / Vendor</option>
-                            <option value="auditor">Auditor</option>
-                        </select>
-                        <input type="email" id="login-email" placeholder="Email Address" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                        <input type="password" id="login-password" placeholder="Password" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition">Login</button>
-                    </form>
-                    <div class="text-center text-sm">
-                        <p class="text-[var(--text-secondary)]">Don't have an account? 
-                            <a href="#signup" class="font-semibold text-[var(--accent-green)] hover:underline">Sign Up</a>
-                        </p>
-                    </div>
+    <div id="dashboard-section" class="section-hidden fade-in">
+        <header class="bg-[var(--bg-primary)] border-b border-[var(--border-color)]">
+            <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+                <div class="flex items-center space-x-2">
+                    <svg class="h-8 w-8 text-[var(--accent-green)]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M21 7.5l-9-5.25L3 7.5m18 0l-9 5.25m9-5.25v9l-9 5.25M3 7.5l9 5.25M3 7.5v9l9 5.25m0-9v9" /></svg>
+                    <h1 class="text-xl font-bold">Subsidy Portal <span id="dashboard-role-display" class="bg-[var(--accent-blue)] text-white text-xs font-semibold px-2 py-1 rounded-full align-middle"></span></h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button data-modal-target="team-modal" class="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">Meet The Team</button>
+                    <button id="change-password-btn" class="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">Change Password</button>
+                    <button id="logout-btn" class="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition">Logout</button>
+                    <div id="theme-switcher-dash"></div>
                 </div>
             </div>
-        </section>
+        </header>
 
-        <section id="signup" class="page-section">
-            <div class="page-container">
-                <div class="w-full max-w-md card rounded-2xl p-8 space-y-6 relative">
-                    <div id="theme-switcher-7" class="absolute top-6 right-6"></div>
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold">Create Account</h1>
-                        <p class="text-[var(--text-secondary)] mt-2">Join the Green Hydrogen Initiative</p>
+        <main class="container mx-auto px-6 py-12">
+            <div id="government-dashboard-content" class="section-hidden">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-3xl font-bold">Vendor Dashboard</h2>
+                     <div class="space-x-2">
+                        <button data-modal-target="add-vendor-modal" class="btn btn-primary text-white font-semibold py-2 px-4 rounded-lg">Register New Vendor</button>
+                        <button id="reset-button" class="btn bg-red-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-red-700">Reset Simulation</button>
                     </div>
-                    <form id="signup-form" class="space-y-4">
-                        <input type="text" id="signup-name" required placeholder="Full Name" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                        <input type="email" id="signup-email" required placeholder="Email Address" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                        <select id="signup-role-select" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)]">
-                            <option value="" disabled selected>Select Your Role</option>
-                            <option value="government">Government Official</option>
-                            <option value="producer">Producer / Vendor</option>
-                            <option value="auditor">Auditor</option>
-                        </select>
-                        <input type="password" id="signup-password" required placeholder="Password" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                        <input type="password" id="signup-confirm-password" required placeholder="Confirm Password" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition">Create Account</button>
-                        <a href="#login" class="block w-full text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">Back to Login</a>
-                    </form>
                 </div>
+                <div id="vendor-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
             </div>
-        </section>
 
-        <section id="government-dashboard" class="page-section">
-            <div class="page-container">
-                <div class="w-full max-w-5xl card rounded-2xl p-8 space-y-6 relative">
-                    <div class="absolute top-6 right-6 flex items-center space-x-4">
-                        <div id="theme-switcher-1"></div>
-                        <a href="#login" class="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--accent-green)] transition">Logout</a>
-                    </div>
-                    <div class="text-center">
-                        <h1 class="text-4xl font-bold">Government Dashboard</h1>
-                        <p class="text-[var(--text-secondary)] mt-2">Team "Error 404" // Green Hydrogen Initiative</p>
-                    </div>
-                    <div class="grid md:grid-cols-3 gap-6">
-                        <div class="md:col-span-2 space-y-4">
-                            <h2 class="text-xl font-semibold">Registered Vendors</h2>
-                            <div id="vendor-list" class="bg-[var(--bg-tertiary)] h-72 rounded-lg p-4 overflow-y-auto space-y-3 custom-scrollbar"></div>
-                        </div>
-                        <div class="md:col-span-1 space-y-4">
-                             <h2 class="text-xl font-semibold">System Controls</h2>
-                            <a href="#add-vendor" class="control-button block text-center text-white font-bold py-4 px-4 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600">Register New Vendor</a>
-                            <a href="#team" class="control-button block text-center text-white font-bold py-4 px-4 rounded-lg bg-gradient-to-r from-blue-500 to-sky-500 hover:from-blue-600 hover:to-sky-600">Meet The Team</a>
-                            <button id="reset-button" class="control-button w-full text-white font-bold py-4 px-4 rounded-lg bg-gradient-to-r from-red-500 to-rose-500 hover:from-red-600 hover:to-rose-600">Reset Simulation</button>
-                        </div>
-                    </div>
-                </div>
+            <div id="producer-dashboard-content" class="section-hidden">
+                 <div id="producer-wallet-area" class="card rounded-xl max-w-2xl mx-auto p-8 text-center">
+                    <h2 class="text-2xl font-bold">Welcome, Producer</h2>
+                    <p class="mt-2 text-[var(--text-secondary)]">Please enter your wallet address to view your project status.</p>
+                    <div class="mt-6 flex space-x-2"><input type="text" id="wallet-id-input" placeholder="0x..." class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><button id="wallet-login-btn" class="btn btn-primary text-white font-semibold py-3 px-6 rounded-lg">Continue</button></div>
+                 </div>
+                 <div id="producer-main-content" class="section-hidden mt-8">
+                     <div class="text-center mb-6">
+                        <p class="text-sm text-[var(--text-secondary)]">Viewing Projects For Wallet:</p>
+                        <p id="wallet-address-display" class="font-mono bg-[var(--bg-tertiary)] inline-block px-3 py-1 rounded-md"></p>
+                        <div class="mt-4"><select id="vendor-select" class="max-w-sm mx-auto bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"></select></div>
+                     </div>
+                     <div id="producer-progress-view" class="section-hidden card rounded-xl p-8 max-w-4xl mx-auto"></div>
+                 </div>
             </div>
-        </section>
-        
-        <section id="producer-dashboard" class="page-section">
-             <div class="page-container">
-                <div class="w-full max-w-4xl card rounded-2xl p-8 space-y-6 relative">
-                     <div class="absolute top-6 right-6 flex items-center space-x-4">
-                        <div id="theme-switcher-2"></div>
-                        <a href="#login" class="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--accent-green)] transition">Logout</a>
-                    </div>
-                    <h1 class="text-3xl font-bold text-center">Producer Dashboard</h1>
-                    <div id="producer-vendor-select" class="text-center">
-                        <label for="vendor-select" class="block mb-2">Select Your Project to View Progress</label>
-                        <select id="vendor-select" class="w-full max-w-sm mx-auto bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)]"></select>
-                    </div>
-                    <div id="producer-progress-view" class="hidden space-y-6">
-                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-center bg-[var(--bg-tertiary)] p-4 rounded-lg">
-                            <div><p class="text-sm text-[var(--text-secondary)]">Production</p><p class="text-2xl font-bold"><span id="producer-current-progress">0</span> / <span id="producer-milestone">0</span></p></div>
-                            <div><p class="text-sm text-[var(--text-secondary)]">Milestone</p><p class="text-2xl font-bold text-[var(--accent-green)]"><span id="producer-percentage">0</span>%</p></div>
-                            <div><p class="text-sm text-[var(--text-secondary)]">Reward</p><p class="text-2xl font-bold"><span id="producer-reward">0</span> ETH</p></div>
-                            <div><p class="text-sm text-[var(--text-secondary)]">Status</p><p class="text-lg font-bold uppercase"><span id="producer-status"></span></p></div>
-                        </div>
-                        <div id="producer-payout-container" class="hidden pt-6 text-center border-t border-[var(--border-color)]">
-                             <button id="payout-btn" class="inline-block bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 px-6 rounded-lg transition">Initiate Payout</button>
-                        </div>
-                    </div>
-                </div>
-             </div>
-        </section>
 
-        <section id="auditor-dashboard" class="page-section">
-            <div class="page-container">
-                <div class="w-full max-w-4xl card rounded-2xl p-8 space-y-6 relative">
-                     <div class="absolute top-6 right-6 flex items-center space-x-4">
-                        <div id="theme-switcher-3"></div>
-                        <a href="#login" class="text-sm font-semibold text-[var(--text-secondary)] hover:text-[var(--accent-green)] transition">Logout</a>
-                    </div>
-                    <h1 class="text-3xl font-bold text-center">Audit Trail</h1>
-                    <p class="text-center text-[var(--text-secondary)]">A read-only log of all vendor activities.</p>
-                    <div id="audit-log" class="bg-[var(--bg-tertiary)] h-96 rounded-lg p-4 font-mono text-sm overflow-y-auto space-y-2 custom-scrollbar"></div>
+            <div id="auditor-dashboard-content" class="section-hidden">
+                <div class="card rounded-xl p-8">
+                    <h2 class="text-2xl font-bold">System Audit Trail</h2>
+                    <p class="mt-1 text-[var(--text-secondary)]">A complete, immutable log of all vendor registrations and payments.</p>
+                    <div id="audit-log" class="mt-6 bg-[var(--bg-tertiary)] max-h-[60vh] rounded-lg p-4 font-mono text-sm overflow-y-auto space-y-3"></div>
                 </div>
             </div>
-        </section>
+        </main>
+    </div>
 
-        <section id="add-vendor" class="page-section">
-            <div class="page-container">
-                 <div class="w-full max-w-md card rounded-2xl p-8 space-y-6 relative">
-                    <div id="theme-switcher-4" class="absolute top-6 right-6"></div>
-                    <h1 class="text-2xl font-bold text-center">Vendor Registration</h1>
-                    <form id="add-vendor-form" class="space-y-4">
-                        <input type="text" id="vendor-name" required placeholder="Vendor Name" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                        <input type="text" id="wallet-address" required placeholder="Wallet Address (0x...)" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                        <div class="flex space-x-4">
-                            <input type="number" id="milestone-goal" required placeholder="Milestone Goal" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                            <input type="number" id="reward-amount" step="0.01" required placeholder="Reward (ETH)" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--accent-green)] placeholder:text-[var(--text-secondary)]">
-                        </div>
-                        <button type="submit" class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition">Submit Registration</button>
-                        <a href="#government-dashboard" class="block w-full text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">Cancel</a>
-                    </form>
-                </div>
-            </div>
-        </section>
-        <section id="team" class="page-section">
-             <div class="page-container">
-                <div class="w-full max-w-4xl card rounded-2xl p-8 space-y-6 relative">
-                    <div id="theme-switcher-5" class="absolute top-6 right-6"></div>
-                    <h1 class="text-3xl font-bold text-center">Meet The Innovators</h1>
-                    <p class="text-center text-[var(--text-secondary)] mt-2">Team "Error 404"</p>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4">
-                        <div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Mahir Shah</p></div>
-                        <div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Daksh Shah</p></div>
-                        <div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Shashvat Patel</p></div>
-                        <div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Dhruvil Patel</p></div>
-                    </div>
-                    <div class="pt-6 border-t border-[var(--border-color)]">
-                        <a href="#government-dashboard" class="block w-full text-center bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-lg transition">Back to Dashboard</a>
-                    </div>
-                </div>
-             </div>
-        </section>
-        <section id="cash-out" class="page-section">
-            <div class="page-container">
-                <div class="w-full max-w-md card rounded-2xl p-8 space-y-6 relative">
-                    <div id="theme-switcher-6" class="absolute top-6 right-6"></div>
-                    <h1 class="text-2xl font-bold text-center">Subsidy Payout</h1>
-                    <div class="bg-[var(--bg-tertiary)] p-6 rounded-lg text-center">
-                        <p class="text-sm text-[var(--text-secondary)]">Amount for <span id="payout-vendor-name" class="font-bold text-[var(--text-primary)]"></span></p>
-                        <p class="text-4xl font-bold my-2"><span id="payout-amount">0</span> ETH</p>
-                    </div>
-                    <form id="cash-out-form" class="space-y-4">
-                        <input type="text" id="payout-wallet" readonly class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 text-[var(--text-primary)] cursor-not-allowed">
-                        <label class="flex items-center text-sm cursor-pointer">
-                            <input type="checkbox" id="payout-confirm" class="h-4 w-4 bg-[var(--bg-tertiary)] border-[var(--border-color)] rounded text-[var(--accent-green)] focus:ring-[var(--accent-green)]">
-                            <span class="ml-3 text-[var(--text-secondary)]">I confirm the withdrawal of the subsidy.</span>
-                        </label>
-                        <button id="payout-submit" type="submit" disabled class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">Initiate Withdrawal</button>
-                        <a href="#producer-dashboard" class="block w-full text-center bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition">Cancel</a>
-                    </form>
-                </div>
-            </div>
-        </section>
-    </main>
+    <div id="modal-container">
+        <div id="login-modal" class="fixed inset-0 z-50 modal-hidden flex items-center justify-center p-4"><div class="fixed inset-0 modal-overlay" data-modal-hide="login-modal"></div><div class="relative modal-content w-full max-w-md"><div class="card rounded-2xl p-8 space-y-6"><div class="text-center"><h1 class="text-2xl font-bold">Portal Login</h1></div><form id="login-form" class="space-y-4"><select id="role-select" name="role" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><option value="government">Government</option><option value="producer">Producer</option><option value="auditor">Auditor</option></select><input type="email" id="login-email" name="email" placeholder="Email Address" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><input type="password" id="login-password" name="password" placeholder="Password" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><button type="submit" class="w-full btn btn-primary text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2"><span>Login</span></button></form></div></div></div>
+        <div id="signup-modal" class="fixed inset-0 z-50 modal-hidden flex items-center justify-center p-4"><div class="fixed inset-0 modal-overlay" data-modal-hide="signup-modal"></div><div class="relative modal-content w-full max-w-md"><div class="card rounded-2xl p-8 space-y-6"><div class="text-center"><h1 class="text-2xl font-bold">Create an Account</h1></div><form id="signup-form" class="space-y-4"><input type="text" id="signup-name" name="name" required placeholder="Full Name" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><input type="email" id="signup-email" name="email" required placeholder="Email Address" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><select id="signup-role-select" name="role" required class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><option value="" disabled selected>Select Role</option><option value="government">Government</option><option value="producer">Producer</option><option value="auditor">Auditor</option></select><input type="password" id="signup-password" name="password" required placeholder="Password" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><input type="password" id="signup-confirm-password" required placeholder="Confirm Password" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><button type="submit" class="w-full btn btn-primary text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2"><span>Create Account</span></button></form></div></div></div>
+        <div id="add-vendor-modal" class="fixed inset-0 z-50 modal-hidden flex items-center justify-center p-4"><div class="fixed inset-0 modal-overlay" data-modal-hide="add-vendor-modal"></div><div class="relative modal-content w-full max-w-md"><div class="card rounded-2xl p-8 space-y-6"><h1 class="text-2xl font-bold text-center">Register New Vendor</h1><form id="add-vendor-form" class="space-y-4"><input type="text" id="vendor-name" required placeholder="Vendor Name" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><input type="email" id="vendor-email" required placeholder="Vendor Email (for their login)" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><input type="text" id="wallet-address" required placeholder="Wallet Address (0x...)" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><div class="flex space-x-4"><input type="number" id="milestone-goal" required placeholder="Milestone Goal" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><input type="number" id="reward-amount" step="0.01" required placeholder="Reward (ETH)" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"></div><button type="submit" class="w-full btn btn-primary text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2"><span>Submit Registration</span></button></form></div></div></div>
+        <div id="change-password-modal" class="fixed inset-0 z-50 modal-hidden flex items-center justify-center p-4"><div class="fixed inset-0 modal-overlay" data-modal-hide="change-password-modal"></div><div class="relative modal-content w-full max-w-md"><div class="card rounded-2xl p-8 space-y-6"><h1 class="text-2xl font-bold text-center">Change Your Password</h1><form id="change-password-form" class="space-y-4"><input type="password" id="current-password" required placeholder="Current Password" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><input type="password" id="new-password" required placeholder="New Password" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><input type="password" id="confirm-new-password" required placeholder="Confirm New Password" class="w-full bg-[var(--bg-tertiary)] border border-[var(--border-color)] rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-[var(--accent-blue)]"><button type="submit" class="w-full btn btn-primary text-white font-bold py-3 px-4 rounded-lg flex items-center justify-center space-x-2"><span>Update Password</span></button></form></div></div></div>
+        <div id="team-modal" class="fixed inset-0 z-50 modal-hidden flex items-center justify-center p-4"><div class="fixed inset-0 modal-overlay" data-modal-hide="team-modal"></div><div class="relative modal-content w-full max-w-2xl"><div class="card rounded-2xl p-8 space-y-6"><h1 class="text-3xl font-bold text-center">Meet The Innovators</h1><p class="text-center text-[var(--text-secondary)] mt-2">Team "Error 404"</p><div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-4"><div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Mahir Shah</p></div><div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Daksh Shah</p></div><div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Shashvat Patel</p></div><div class="text-center bg-[var(--bg-tertiary)] p-6 rounded-lg"><p class="font-bold text-lg">Dhruvil Patel</p></div></div></div></div></div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const API_BASE_URL = 'http://localhost:3000';
-            let vendors = [];
-            let selectedVendor = null;
 
-            const initTheme = () => {
-                const isDarkMode = document.documentElement.classList.contains('dark');
-                const icon = isDarkMode ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
-                document.querySelectorAll('[id^="theme-switcher-"]').forEach(el => {
-                    el.innerHTML = `<button class="theme-toggle p-2 rounded-full bg-[var(--bg-tertiary)] hover:bg-[var(--border-color)] transition">${icon}</button>`;
-                });
-                document.querySelectorAll('.theme-toggle').forEach(btn => btn.addEventListener('click', () => {
-                    const isDark = document.documentElement.classList.toggle('dark');
-                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-                    initTheme(); // Re-render toggles
-                }));
+            const AppState = {
+                vendors: [],
+                loggedInUserEmail: null,
+                selectedVendor: null
             };
 
-            const fetchVendors = async () => {
-                try {
-                    const response = await fetch(`${API_BASE_URL}/vendors`);
-                    if (response.ok) vendors = await response.json();
-                } catch (error) { console.error("Failed to fetch vendors", error); }
+            const UI = {
+                landingPage: document.getElementById('landing-page-section'),
+                dashboard: document.getElementById('dashboard-section'),
+                modals: {
+                    login: document.getElementById('login-modal'),
+                    signup: document.getElementById('signup-modal'),
+                    addVendor: document.getElementById('add-vendor-modal'),
+                    changePass: document.getElementById('change-password-modal'),
+                },
+                forms: {
+                    login: document.getElementById('login-form'),
+                    signup: document.getElementById('signup-form'),
+                    addVendor: document.getElementById('add-vendor-form'),
+                    changePass: document.getElementById('change-password-form'),
+                },
+                buttons: {
+                    logout: document.getElementById('logout-btn'),
+                    changePass: document.getElementById('change-password-btn'),
+                    reset: document.getElementById('reset-button'),
+                    walletLogin: document.getElementById('wallet-login-btn')
+                },
+                themeSwitchers: {
+                    main: document.getElementById('theme-switcher-main'),
+                    dash: document.getElementById('theme-switcher-dash')
+                },
+                dashboardRoleDisplay: document.getElementById('dashboard-role-display'),
+                vendorGrid: document.getElementById('vendor-grid'),
+                producer: {
+                    walletArea: document.getElementById('producer-wallet-area'),
+                    mainContent: document.getElementById('producer-main-content'),
+                    walletInput: document.getElementById('wallet-id-input'),
+                    walletDisplay: document.getElementById('wallet-address-display'),
+                    vendorSelect: document.getElementById('vendor-select'),
+                    progressView: document.getElementById('producer-progress-view'),
+                },
+                auditLog: document.getElementById('audit-log'),
+                toastContainer: document.getElementById('toast-container'),
+                backgroundAnimation: document.getElementById('background-animation')
             };
 
-            // --- Role Specific Setups ---
-            const setupGovernmentView = () => {
-                const vendorListEl = document.getElementById('vendor-list');
-                const resetButton = document.getElementById('reset-button');
-                vendorListEl.innerHTML = '';
-                if (vendors.length > 0) {
-                    vendors.forEach(v => {
-                        const div = document.createElement('div');
-                        div.className = "bg-[var(--bg-secondary)] p-3 rounded-lg flex justify-between items-center border border-[var(--border-color)]";
-                        div.innerHTML = `<div><p class="font-bold">${v.name}</p><p class="text-xs text-[var(--text-secondary)]">${v.wallet_address}</p></div><span class="text-sm font-semibold ${v.is_paid ? 'text-blue-500' : 'text-yellow-400'}">${v.is_paid ? 'PAID' : 'ACTIVE'}</span>`;
-                        vendorListEl.appendChild(div);
-                    });
+            const showToast = (message, type = 'info') => {
+                const icon = {
+                    success: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+                    error: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`,
+                    info: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>`
+                };
+                const toast = document.createElement('div');
+                toast.className = `toast toast-${type}`;
+                toast.innerHTML = `${icon[type]}<span>${message}</span>`;
+                UI.toastContainer.appendChild(toast);
+                setTimeout(() => toast.remove(), 5000);
+            };
+            
+            const toggleButtonLoading = (button, isLoading) => {
+                const textSpan = button.querySelector('span');
+                if (isLoading) {
+                    button.disabled = true;
+                    if (textSpan) textSpan.style.display = 'none';
+                    const spinner = document.createElement('div');
+                    spinner.className = 'spinner';
+                    button.prepend(spinner);
                 } else {
-                    vendorListEl.innerHTML = `<p class="text-[var(--text-secondary)]">No vendors registered yet.</p>`;
-                }
-                resetButton.addEventListener('click', async () => {
-                     try {
-                        const response = await fetch(`${API_BASE_URL}/reset`, { method: 'POST' });
-                        if(response.ok) { vendors = []; setupGovernmentView(); }
-                    } catch (error) { console.error("Failed to reset.", error); }
-                });
-            };
-
-            const setupProducerView = () => {
-                const selectEl = document.getElementById('vendor-select');
-                const progressView = document.getElementById('producer-progress-view');
-                selectEl.innerHTML = '<option selected disabled>-- Select Your Project --</option>';
-                vendors.forEach(v => {
-                    const option = document.createElement('option');
-                    option.value = v.id;
-                    option.textContent = v.name;
-                    selectEl.appendChild(option);
-                });
-                selectEl.addEventListener('change', async (e) => {
-                    const vendorId = e.target.value;
-                    selectedVendor = vendors.find(v => v.id == vendorId);
-                    if (!selectedVendor) return;
-                    
-                    const response = await fetch(`${API_BASE_URL}/vendors/${vendorId}/progress`);
-                    const data = await response.json();
-                    
-                    document.getElementById('producer-current-progress').textContent = data.totalProgress || 0;
-                    document.getElementById('producer-milestone').textContent = selectedVendor.milestone_goal;
-                    document.getElementById('producer-percentage').textContent = Math.round(((data.totalProgress || 0)/selectedVendor.milestone_goal)*100);
-                    document.getElementById('producer-reward').textContent = selectedVendor.reward_amount;
-                    const statusEl = document.getElementById('producer-status');
-                    const payoutContainer = document.getElementById('producer-payout-container');
-                    payoutContainer.classList.add('hidden');
-
-                    if(selectedVendor.is_paid) { statusEl.textContent = 'PAID'; statusEl.className = 'text-blue-500'; }
-                    else if ((data.totalProgress || 0) >= selectedVendor.milestone_goal) { statusEl.textContent = 'PAYOUT READY'; statusEl.className = 'text-green-500'; payoutContainer.classList.remove('hidden'); }
-                    else { statusEl.textContent = 'ACTIVE'; statusEl.className = 'text-yellow-400'; }
-                    
-                    progressView.classList.remove('hidden');
-                });
-                 document.getElementById('payout-btn').addEventListener('click', () => {
-                     if(!selectedVendor) return;
-                     document.getElementById('payout-vendor-name').textContent = selectedVendor.name;
-                     document.getElementById('payout-amount').textContent = selectedVendor.reward_amount;
-                     document.getElementById('payout-wallet').value = selectedVendor.wallet_address;
-                     window.location.hash = '#cash-out';
-                 });
-            };
-
-            const setupAuditorView = () => {
-                const logEl = document.getElementById('audit-log');
-                logEl.innerHTML = '';
-                if(vendors.length > 0) {
-                    vendors.forEach(v => {
-                        const entry = document.createElement('p');
-                        entry.innerHTML = `<span class="opacity-50">${new Date(v.created_at).toLocaleString()}</span> &gt; <span class="text-green-500">REGISTER</span> &gt; ${v.name} created.`;
-                        logEl.appendChild(entry);
-                        if(v.is_paid) {
-                             const paidEntry = document.createElement('p');
-                             paidEntry.innerHTML = `<span class="opacity-50">${new Date().toLocaleString()}</span> &gt; <span class="text-blue-500">PAYOUT</span> &gt; ${v.name} processed ${v.reward_amount} ETH.`;
-                             logEl.appendChild(paidEntry);
-                        }
-                    });
-                } else {
-                    logEl.innerHTML = `<p class="text-[var(--text-secondary)]">No activity to display.</p>`;
+                    button.disabled = false;
+                    if (textSpan) textSpan.style.display = 'inline';
+                    const spinner = button.querySelector('.spinner');
+                    if(spinner) spinner.remove();
                 }
             };
             
-            // --- MAIN LOGIC ---
-            const init = async () => {
-                initTheme();
-                
-                // LOGIN FORM
-                document.getElementById('login-form').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const email = document.getElementById('login-email').value;
-                    const password = document.getElementById('login-password').value;
-                    const role = document.getElementById('role-select').value;
-                    
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/login`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ email, password, role })
-                        });
-
-                        if (response.ok) {
-                            const data = await response.json();
-                            localStorage.setItem('userRole', data.user.role);
-                            window.location.hash = `#${data.user.role}-dashboard`;
-                        } else {
-                            const err = await response.json();
-                            alert(`Login Failed: ${err.message}`);
-                        }
-                    } catch (error) {
-                        alert('Error connecting to the server.');
+            const apiCall = async (endpoint, options = {}) => {
+                try {
+                    const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.message || 'An unknown error occurred.');
                     }
-                });
-
-                // SIGNUP FORM
-                document.getElementById('signup-form').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const name = document.getElementById('signup-name').value;
-                    const email = document.getElementById('signup-email').value;
-                    const role = document.getElementById('signup-role-select').value;
-                    const password = document.getElementById('signup-password').value;
-                    const confirmPassword = document.getElementById('signup-confirm-password').value;
-
-                    if (password !== confirmPassword) {
-                        alert("Passwords do not match.");
-                        return;
-                    }
-                    if (!role) {
-                        alert("Please select a role.");
-                        return;
-                    }
-
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/signup`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ name, email, role, password })
-                        });
-                        
-                        if (response.ok) {
-                            alert('Sign up successful! Please log in.');
-                            window.location.hash = '#login';
-                        } else {
-                            const err = await response.json();
-                            alert(`Error: ${err.message || "Could not sign up."}`);
-                        }
-                    } catch (error) {
-                        console.error("Sign up failed:", error);
-                        alert("An error occurred during sign up.");
-                    }
-                });
-
-                // ADD VENDOR FORM
-                document.getElementById('add-vendor-form').addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    const formData = {
-                        name: document.getElementById('vendor-name').value, walletAddress: document.getElementById('wallet-address').value,
-                        milestoneGoal: parseInt(document.getElementById('milestone-goal').value), rewardAmount: parseFloat(document.getElementById('reward-amount').value),
-                    };
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/add-vendor`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(formData) });
-                        if (response.ok) { window.location.hash = '#government-dashboard'; } 
-                        else { const err = await response.json(); alert(`Error: ${err.message || "Please check your input values."}`); }
-                    } catch (error) { console.error("Failed to add vendor", error); }
-                });
-
-                // CASHOUT FORM
-                const cashOutForm = document.getElementById('cash-out-form');
-                const payoutConfirmCheck = document.getElementById('payout-confirm');
-                const payoutSubmitBtn = document.getElementById('payout-submit');
-                payoutConfirmCheck.addEventListener('change', () => { payoutSubmitBtn.disabled = !payoutConfirmCheck.checked; });
-                cashOutForm.addEventListener('submit', async (e) => {
-                    e.preventDefault();
-                    if (!selectedVendor) return;
-                    payoutSubmitBtn.disabled = true; payoutSubmitBtn.textContent = 'Processing...';
-                    try {
-                        const response = await fetch(`${API_BASE_URL}/vendors/${selectedVendor.id}/payout`, { method: 'POST' });
-                        if(response.ok) {
-                            window.location.hash = '#producer-dashboard';
-                        } else { alert("Server failed to process payout."); }
-                    } catch(error) { alert("Connection error during payout."); }
-                    finally { payoutSubmitBtn.textContent = 'Initiate Withdrawal'; }
-                });
-
-                // ROUTING
-                const route = async () => {
-                    await fetchVendors();
-                    
-                    const hash = window.location.hash || '#login';
-                    const userRole = localStorage.getItem('userRole');
-
-                    const publicPages = ['#login', '#signup'];
-                    const isProtectedPage = !publicPages.includes(hash);
-
-                    if (isProtectedPage && !userRole) {
-                        window.location.hash = '#login';
-                        return; 
-                    }
-
-                    if (hash === '#login') {
-                        localStorage.removeItem('userRole');
-                    }
-                    
-                    document.querySelectorAll('.page-section').forEach(s => s.style.display = 'none');
-                    const targetSection = document.querySelector(hash);
-
-                    if(targetSection) {
-                         targetSection.style.display = 'block';
-                    } else {
-                        document.getElementById('login').style.display = 'block';
-                    }
-                    
-                    if (hash === '#government-dashboard') setupGovernmentView();
-                    if (hash === '#producer-dashboard') setupProducerView();
-                    if (hash === '#auditor-dashboard') setupAuditorView();
-                };
-
-                window.addEventListener('hashchange', route);
-                route(); // Initial route call
+                    return data;
+                } catch (error) {
+                    showToast(error.message, 'error');
+                    console.error(`API call to ${endpoint} failed:`, error);
+                    throw error;
+                }
+            };
+            
+            const initBubbleAnimation = () => {
+                const container = UI.backgroundAnimation;
+                container.innerHTML = '';
+                const count = 30;
+                for(let i = 0; i < count; i++) {
+                    const bubble = document.createElement('div');
+                    bubble.className = 'bubble';
+                    const size = Math.random() * 100 + 40;
+                    bubble.style.width = `${size}px`;
+                    bubble.style.height = `${size}px`;
+                    bubble.style.left = `${Math.random() * 100}%`;
+                    bubble.style.animationDuration = `${Math.random() * 15 + 20}s`;
+                    bubble.style.animationDelay = `${Math.random() * 15}s`;
+                    container.appendChild(bubble);
+                }
             };
 
-            init();
+            const initTheme = () => {
+                const isDark = document.documentElement.classList.contains('dark');
+                const icon = isDark ? `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-yellow-400"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>` : `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+                const switcherHTML = `<button class="theme-toggle p-2 rounded-full bg-[var(--bg-tertiary)] hover:bg-[var(--border-color)] transition">${icon}</button>`;
+                UI.themeSwitchers.main.innerHTML = switcherHTML;
+                UI.themeSwitchers.dash.innerHTML = switcherHTML;
+                
+                document.querySelectorAll('.theme-toggle').forEach(btn => btn.addEventListener('click', () => {
+                    const isDark = document.documentElement.classList.toggle('dark');
+                    localStorage.setItem('theme', isDark ? 'dark' : 'light');
+                    initTheme();
+                }));
+            };
+
+            const initModals = () => {
+                document.querySelectorAll('[data-modal-target]').forEach(button => button.addEventListener('click', () => document.getElementById(button.dataset.modalTarget).classList.remove('modal-hidden')));
+                document.querySelectorAll('[data-modal-hide]').forEach(el => el.addEventListener('click', () => document.getElementById(el.dataset.modalHide).classList.add('modal-hidden')));
+            };
+
+            const initAnimations = () => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('animated');
+                        }
+                    });
+                }, { threshold: 0.1 });
+                document.querySelectorAll('.animate-in').forEach(el => observer.observe(el));
+            };
+
+            const showDashboard = (role) => {
+                UI.landingPage.classList.add('section-hidden');
+                UI.dashboard.classList.remove('section-hidden');
+                document.querySelectorAll('#dashboard-section [id$="-dashboard-content"]').forEach(el => el.classList.add('section-hidden'));
+                
+                const roleContent = document.getElementById(`${role}-dashboard-content`);
+                if(roleContent) roleContent.classList.remove('section-hidden');
+                UI.dashboardRoleDisplay.textContent = role;
+                UI.buttons.changePass.style.display = (role === 'producer') ? 'block' : 'none';
+            };
+
+            const showLandingPage = () => {
+                UI.landingPage.classList.remove('section-hidden');
+                UI.dashboard.classList.add('section-hidden');
+                localStorage.removeItem('userRole');
+                localStorage.removeItem('userEmail');
+                AppState.loggedInUserEmail = null;
+            };
+
+            const renderVendorSkeleton = () => {
+                UI.vendorGrid.innerHTML = Array(6).fill('').map(() => `
+                    <div class="card rounded-xl p-6 space-y-4">
+                        <div class="h-6 w-3/4 skeleton rounded"></div>
+                        <div class="h-4 w-full skeleton rounded"></div>
+                        <div class="h-4 w-5/6 skeleton rounded"></div>
+                        <div class="h-3 w-1/4 skeleton rounded ml-auto"></div>
+                    </div>
+                `).join('');
+            };
+
+            const setupGovernmentView = async () => {
+                renderVendorSkeleton();
+                try {
+                    const vendors = await apiCall('/vendors');
+                    const progressPromises = vendors.map(v => apiCall(`/vendors/${v.id}/progress`).catch(() => ({ totalProgress: 0 })));
+                    const progresses = await Promise.all(progressPromises);
+                    
+                    AppState.vendors = vendors.map((vendor, index) => ({ ...vendor, ...progresses[index] }));
+                    
+                    UI.vendorGrid.innerHTML = '';
+                    if (AppState.vendors.length > 0) {
+                        AppState.vendors.forEach(v => {
+                            const percentage = v.milestone_goal > 0 ? Math.round(((v.totalProgress || 0) / v.milestone_goal) * 100) : 0;
+                            const status = v.is_paid ? { text: 'Paid', color: 'blue-500' } : { text: 'Active', color: 'yellow-400' };
+                            const card = document.createElement('div');
+                            card.className = "card rounded-xl p-6 flex flex-col justify-between";
+                            card.innerHTML = `
+                                <div>
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="text-xl font-bold">${v.name}</h3>
+                                        <span class="text-xs font-semibold uppercase text-${status.color}">${status.text}</span>
+                                    </div>
+                                    <p class="text-xs text-[var(--text-secondary)] font-mono mt-1 break-all">${v.wallet_address}</p>
+                                </div>
+                                <div class="mt-4">
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span class="font-medium text-[var(--text-secondary)]">Progress</span>
+                                        <span class="font-bold">${v.totalProgress || 0} / ${v.milestone_goal}</span>
+                                    </div>
+                                    <div class="progress-bar h-2 w-full"><div class="progress-bar-inner" style="width: ${percentage}%;"></div></div>
+                                </div>`;
+                            UI.vendorGrid.appendChild(card);
+                        });
+                    } else {
+                        UI.vendorGrid.innerHTML = `<p class="text-[var(--text-secondary)] text-center py-8 col-span-full">No vendors registered yet.</p>`;
+                    }
+                } catch (error) { UI.vendorGrid.innerHTML = `<p class="text-red-500 text-center py-8 col-span-full">Failed to load vendor data.</p>`; }
+            };
+            
+            const setupProducerView = () => {
+                const storedWallet = localStorage.getItem('producerWallet');
+                if(storedWallet) UI.producer.walletInput.value = storedWallet;
+
+                UI.buttons.walletLogin.addEventListener('click', async () => {
+                    const enteredAddress = UI.producer.walletInput.value.trim().toLowerCase();
+                    if (!enteredAddress) return showToast("Please enter a wallet address.", "error");
+
+                    localStorage.setItem('producerWallet', enteredAddress);
+                    const eligibleVendors = AppState.vendors.filter(v => v.wallet_address.toLowerCase() === enteredAddress);
+                    if (eligibleVendors.length === 0) return showToast("No projects found for this wallet address.", "error");
+                    
+                    UI.producer.walletArea.classList.add('section-hidden');
+                    UI.producer.mainContent.classList.remove('section-hidden');
+                    UI.producer.walletDisplay.textContent = enteredAddress;
+
+                    UI.producer.vendorSelect.innerHTML = '<option selected disabled>-- Select Your Project --</option>';
+                    eligibleVendors.forEach(v => UI.producer.vendorSelect.appendChild(new Option(v.name, v.id)));
+                });
+
+                UI.producer.vendorSelect.addEventListener('change', async (e) => {
+                    const vendorId = e.target.value;
+                    const vendor = AppState.vendors.find(v => v.id == vendorId);
+                    if (!vendor) return;
+
+                    try {
+                        const progress = await apiCall(`/vendors/${vendorId}/progress`);
+                        AppState.selectedVendor = { ...vendor, ...progress };
+                        renderProducerProgress();
+                    } catch (error) { /* Toast is shown by apiCall */ }
+                });
+            };
+
+            const renderProducerProgress = () => {
+                const v = AppState.selectedVendor;
+                const progress = v.totalProgress || 0;
+                const percentage = v.milestone_goal > 0 ? Math.min(Math.round((progress / v.milestone_goal) * 100), 100) : 0;
+                const strokeDasharray = 2 * Math.PI * 56;
+                const strokeDashoffset = strokeDasharray - (strokeDasharray * percentage) / 100;
+
+                let status;
+                if (v.is_paid) status = { text: 'Paid', color: 'blue', icon: 'M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z' };
+                else if (progress >= v.milestone_goal) status = { text: 'Payout Ready', color: 'green', icon: 'M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.75A.75.75 0 013 4.5h.75m0 0h.75A.75.75 0 015.25 6v.75m0 0H3.75m0 0A.75.75 0 013 7.5h1.5a.75.75 0 01.75.75v.75m0 0h.75a.75.75 0 01.75.75v.75m0 0h.75a.75.75 0 01.75.75v.75M6 12v.75a.75.75 0 00.75.75h.75m0 0h.75a.75.75 0 00.75-.75V12m0 0h.75a.75.75 0 00.75-.75V11.25m0 0v-.75a.75.75 0 00-.75-.75h-.75m-1.5 0A.75.75 0 006 9.75V9m0 0V8.25A.75.75 0 016.75 7.5h.75M15 12V6.375c0-.621-.504-1.125-1.125-1.125H4.125C3.504 5.25 3 5.754 3 6.375V12m12 0v3.75c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 013 15.75V12m12 0h-3.375M12 12.75h.008v.008H12v-.008z' };
+                else status = { text: 'Active', color: 'yellow', icon: 'M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0011.667 0l3.181-3.183m-4.991-2.691v4.992' };
+                
+                UI.producer.progressView.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-center">
+                        <div class="relative w-48 h-48 mx-auto">
+                            <svg class="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
+                                <circle cx="60" cy="60" r="56" fill="none" stroke="var(--bg-tertiary)" stroke-width="8" />
+                                <circle cx="60" cy="60" r="56" fill="none" stroke="var(--accent-green)" stroke-width="8" stroke-linecap="round"
+                                        stroke-dasharray="${strokeDasharray}" stroke-dashoffset="${strokeDashoffset}"
+                                        style="transition: stroke-dashoffset 0.5s ease-in-out;" />
+                            </svg>
+                            <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                <span class="text-4xl font-bold">${percentage}%</span>
+                                <span class="text-sm text-[var(--text-secondary)]">Complete</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-2 grid grid-cols-2 gap-6 text-center md:text-left">
+                            <div><p class="text-sm text-[var(--text-secondary)]">Production Progress</p><p class="text-3xl font-bold mt-1">${progress} / ${v.milestone_goal}</p></div>
+                            <div><p class="text-sm text-[var(--text-secondary)]">Subsidy Reward</p><p class="text-3xl font-bold mt-1">${v.reward_amount} ETH</p></div>
+                            <div class="col-span-2">
+                                <p class="text-sm text-[var(--text-secondary)] text-center">Payment Status</p>
+                                <div class="mt-2 text-center flex items-center justify-center text-2xl font-bold uppercase text-${status.color}-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-7 h-7 mr-2"><path stroke-linecap="round" stroke-linejoin="round" d="${status.icon}" /></svg>
+                                    <span>${status.text}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                UI.producer.progressView.classList.remove('section-hidden');
+            };
+
+            const setupAuditorView = () => {
+                UI.auditLog.innerHTML = '';
+                if(AppState.vendors.length > 0) {
+                    AppState.vendors.forEach(v => {
+                        const registerIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2 inline text-green-400"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zM4 19.235v-.11a6.375 6.375 0 0112.75 0v.109A12.318 12.318 0 0110.5 21h-5A12.318 12.318 0 014 19.235z" /></svg>`;
+                        const payoutIcon = `<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 mr-2 inline text-blue-400"><path stroke-linecap="round" stroke-linejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.75A.75.75 0 013 4.5h.75m0 0h.75A.75.75 0 015.25 6v.75m0 0H3.75m0 0A.75.75 0 013 7.5h1.5a.75.75 0 01.75.75v.75m0 0h.75a.75.75 0 01.75.75v.75m0 0h.75a.75.75 0 01.75.75v.75M6 12v.75a.75.75 0 00.75.75h.75m0 0h.75a.75.75 0 00.75-.75V12m0 0h.75a.75.75 0 00.75-.75V11.25m0 0v-.75a.75.75 0 00-.75-.75h-.75m-1.5 0A.75.75 0 006 9.75V9m0 0V8.25A.75.75 0 016.75 7.5h.75M15 12V6.375c0-.621-.504-1.125-1.125-1.125H4.125C3.504 5.25 3 5.754 3 6.375V12m12 0v3.75c0 .621-.504 1.125-1.125 1.125H4.125A1.125 1.125 0 013 15.75V12m12 0h-3.375M12 12.75h.008v.008H12v-.008z" /></svg>`;
+                        
+                        UI.auditLog.innerHTML += `<div><span class="opacity-50">${new Date(v.created_at).toLocaleString()}</span> <span class="text-green-400 font-bold">&gt; REGISTER</span> ${registerIcon} ${v.name} (${v.wallet_address})</div>`;
+                        if(v.is_paid) UI.auditLog.innerHTML += `<div><span class="opacity-50">${new Date(v.created_at).toLocaleString()}</span> <span class="text-blue-400 font-bold">&gt; PAYOUT</span> ${payoutIcon} ${v.name} received ${v.reward_amount} ETH.</div>`;
+                    });
+                } else {
+                    UI.auditLog.innerHTML = `<p class="text-[var(--text-secondary)]">No activity to display.</p>`;
+                }
+            };
+            
+            async function initializeApp() {
+                const userRole = localStorage.getItem('userRole');
+                AppState.loggedInUserEmail = localStorage.getItem('userEmail');
+                
+                if (userRole) {
+                    showDashboard(userRole);
+                    try {
+                        AppState.vendors = await apiCall('/vendors');
+                        if (userRole === 'government') setupGovernmentView();
+                        if (userRole === 'producer') setupProducerView();
+                        if (userRole === 'auditor') setupAuditorView();
+                    } catch (error) { console.error("Failed to initialize dashboard data:", error); }
+                } else {
+                    showLandingPage();
+                }
+            }
+            
+            UI.forms.login.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const formData = Object.fromEntries(new FormData(e.target));
+                const button = e.target.querySelector('button');
+                toggleButtonLoading(button, true);
+
+                fetch(`${API_BASE_URL}/login`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                }).then(async res => {
+                    const data = await res.json();
+                    if(!res.ok) throw new Error(data.message);
+                    return data;
+                }).then(data => {
+                    showToast('Login successful!', 'success');
+                    localStorage.setItem('userRole', data.user.role);
+                    localStorage.setItem('userEmail', data.user.email);
+                    UI.modals.login.classList.add('modal-hidden');
+                    initializeApp();
+                }).catch(err => showToast(`Login Failed: ${err.message}`, 'error'))
+                .finally(() => toggleButtonLoading(button, false));
+            });
+
+            UI.forms.signup.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const button = e.target.querySelector('button');
+                const password = document.getElementById('signup-password').value;
+                if (password !== document.getElementById('signup-confirm-password').value) return showToast("Passwords do not match.", "error");
+                
+                toggleButtonLoading(button, true);
+                const formData = Object.fromEntries(new FormData(e.target));
+                try {
+                    await apiCall('/signup', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(formData)});
+                    showToast('Sign up successful! Please log in.', 'success');
+                    UI.modals.signup.classList.add('modal-hidden');
+                    UI.modals.login.classList.remove('modal-hidden');
+                } catch(err) { /* handled by apiCall */ } 
+                finally { toggleButtonLoading(button, false); }
+            });
+
+            UI.forms.addVendor.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const button = e.target.querySelector('button');
+                toggleButtonLoading(button, true);
+                const formData = {
+                    name: document.getElementById('vendor-name').value, 
+                    vendorEmail: document.getElementById('vendor-email').value,
+                    walletAddress: document.getElementById('wallet-address').value,
+                    milestoneGoal: parseInt(document.getElementById('milestone-goal').value), 
+                    rewardAmount: parseFloat(document.getElementById('reward-amount').value),
+                };
+                try {
+                    await apiCall('/add-vendor', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(formData)});
+                    showToast('Vendor registered! Default password is "123".', 'success');
+                    UI.modals.addVendor.classList.add('modal-hidden');
+                    initializeApp();
+                } catch (error) { /* handled by apiCall */ }
+                finally { toggleButtonLoading(button, false); }
+            });
+
+            UI.forms.changePass.addEventListener('submit', async(e) => {
+                e.preventDefault();
+                const button = e.target.querySelector('button');
+                const newPassword = document.getElementById('new-password').value;
+                if (newPassword !== document.getElementById('confirm-new-password').value) return showToast("New passwords do not match.", "error");
+                if (!AppState.loggedInUserEmail) return showToast("Error: User email not found. Please log in again.", "error");
+
+                toggleButtonLoading(button, true);
+                try {
+                    const body = {
+                        email: AppState.loggedInUserEmail,
+                        currentPassword: document.getElementById('current-password').value,
+                        newPassword: newPassword
+                    };
+                    const result = await apiCall('/change-password', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                    showToast(result.message, 'success');
+                    UI.modals.changePass.classList.add('modal-hidden');
+                } catch (error) { /* Handled */ } 
+                finally { toggleButtonLoading(button, false); }
+            });
+
+            UI.buttons.logout.addEventListener('click', showLandingPage);
+            UI.buttons.changePass.addEventListener('click', () => UI.modals.changePass.classList.remove('modal-hidden'));
+            UI.buttons.reset.addEventListener('click', async () => {
+                if(confirm("Are you sure you want to reset all data? This cannot be undone.")) {
+                    try {
+                        await apiCall('/reset', { method: 'POST' });
+                        showToast("Simulation reset successfully.", "success");
+                        initializeApp();
+                    } catch (error) { /* Handled */ }
+                }
+            });
+
+            if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            }
+            initTheme();
+            initModals();
+            initAnimations();
+            initBubbleAnimation();
+            initializeApp();
         });
     </script>
 </body>
 </html>
+
+

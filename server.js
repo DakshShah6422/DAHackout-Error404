@@ -2,38 +2,59 @@ const express = require('express');
 const mysql = require('mysql2/promise');
 const path = require('path');
 const cors = require('cors');
-const bcrypt = require('bcrypt'); // <-- ADD THIS for password hashing
+const bcrypt = require('bcrypt');
+const ethers = require('ethers');
 require('dotenv').config();
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
 
-const dbUrl = new URL(process.env.DATABASE_URL);
-const dbConfig = {
-    host: dbUrl.hostname,
-    user: dbUrl.username,
-    password: dbUrl.password,
-    database: dbUrl.pathname.substring(1),
-    port: dbUrl.port,
-    waitForConnections: true,
-    connectionLimit: 10,
-    queueLimit: 0
-};
+let dbConfig;
+try {
+    if (!process.env.DATABASE_URL) {
+        throw new Error("DATABASE_URL environment variable is not set.");
+    }
+    const dbUrl = new URL(process.env.DATABASE_URL);
+    dbConfig = {
+        host: dbUrl.hostname,
+        user: dbUrl.username,
+        password: dbUrl.password,
+        database: dbUrl.pathname.substring(1),
+        port: dbUrl.port,
+        waitForConnections: true,
+        connectionLimit: 10,
+        queueLimit: 0
+    };
+} catch (error) {
+    console.error("Error configuring database:", error.message);
+    process.exit(1);
+}
 
 let pool;
+let contract;
 
-async function setupDatabase() {
+const contractABI = [
+	{"inputs": [], "stateMutability": "nonpayable", "type": "constructor"},
+	{"inputs": [{"internalType": "address", "name": "_producerAddress", "type": "address"}, {"internalType": "uint256", "name": "_milestoneGoal", "type": "uint256"}, {"internalType": "uint256", "name": "_rewardAmount", "type": "uint256"}], "name": "addVendor", "outputs": [], "stateMutability": "nonpayable", "type": "function"},
+	{"inputs": [], "name": "depositSubsidy", "outputs": [], "stateMutability": "payable", "type": "function"},
+	{"inputs": [], "name": "government", "outputs": [{"internalType": "address", "name": "", "type": "address"}], "stateMutability": "view", "type": "function"},
+	{"inputs": [{"internalType": "address", "name": "_vendorAddress", "type": "address"}, {"internalType": "uint256", "name": "_newProgress", "type": "uint256"}], "name": "updateProgress", "outputs": [], "stateMutability": "nonpayable", "type": "function"},
+	{"inputs": [{"internalType": "address", "name": "", "type": "address"}], "name": "vendors", "outputs": [{"internalType": "address", "name": "producerAddress", "type": "address"}, {"internalType": "uint256", "name": "milestoneGoal", "type": "uint256"}, {"internalType": "uint256", "name": "currentProgress", "type": "uint256"}, {"internalType": "uint256", "name": "rewardAmount", "type": "uint256"}, {"internalType": "bool", "name": "isPaid", "type": "bool"}, {"internalType": "bool", "name": "isActive", "type": "bool"}], "stateMutability": "view", "type": "function"},
+	{"inputs": [], "name": "withdrawSubsidy", "outputs": [], "stateMutability": "nonpayable", "type": "function"}
+];
+
+async function setup() {
     try {
         pool = mysql.createPool(dbConfig);
         await pool.query('SELECT 1');
-        console.log("Connected to Railway MySQL!");
+        console.log("Connected to MySQL Database!");
 
-        // NEW: users table for authentication
         await pool.query(`
             CREATE TABLE IF NOT EXISTS users (
                 id INT AUTO_INCREMENT PRIMARY KEY,
@@ -67,14 +88,22 @@ async function setupDatabase() {
             );
         `);
 
-        console.log("Tables 'users', 'vendors', and 'progress_logs' are ready.");
+        console.log("Database tables are ready.");
+
+        if (process.env.RPC_URL && process.env.PRIVATE_KEY && process.env.CONTRACT_ADDRESS) {
+            const provider = new ethers.JsonRpcProvider(process.env.RPC_URL);
+            const wallet = new ethers.Wallet(process.env.PRIVATE_KEY, provider);
+            contract = new ethers.Contract(process.env.CONTRACT_ADDRESS, contractABI, wallet);
+            console.log("Connected to smart contract at address:", await contract.getAddress());
+        } else {
+            console.warn("Blockchain environment variables not set. Running in offline mode.");
+        }
+
     } catch (error) {
-        console.error("Could not set up the database:", error.message);
+        console.error("Could not set up the application:", error.message);
         process.exit(1);
     }
 }
-
-// --- NEW AUTHENTICATION ROUTES ---
 
 app.post('/signup', async (req, res) => {
     const { name, email, role, password } = req.body;
@@ -85,10 +114,8 @@ app.post('/signup', async (req, res) => {
     try {
         const saltRounds = 10;
         const passwordHash = await bcrypt.hash(password, saltRounds);
-
         const sql = "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)";
         await pool.query(sql, [name, email, passwordHash, role]);
-
         res.status(201).json({ message: "User created successfully!" });
     } catch (err) {
         if (err.code === 'ER_DUP_ENTRY') {
@@ -99,9 +126,8 @@ app.post('/signup', async (req, res) => {
     }
 });
 
-// NOTE: You'll need to update your frontend login logic to call this endpoint
 app.post('/login', async (req, res) => {
-    const { email, password, role } = req.body; // Role is sent from frontend
+    const { email, password, role } = req.body;
     if (!email || !password || !role) {
         return res.status(400).json({ message: "Email, password, and role are required." });
     }
@@ -109,66 +135,103 @@ app.post('/login', async (req, res) => {
     try {
         const sql = "SELECT * FROM users WHERE email = ?";
         const [rows] = await pool.query(sql, [email]);
-
         if (rows.length === 0) {
             return res.status(401).json({ message: "Invalid email or password." });
         }
-
         const user = rows[0];
-
-        // Verify password
         const passwordMatch = await bcrypt.compare(password, user.password_hash);
         if (!passwordMatch) {
             return res.status(401).json({ message: "Invalid email or password." });
         }
-        
-        // Verify role matches the one selected on the login screen
         if (user.role !== role) {
             return res.status(403).json({ message: `Access denied. Please log in through the '${user.role}' portal.` });
         }
-
-        // Login successful, send back user info (without password)
         res.status(200).json({
             message: "Login successful!",
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            }
+            user: { id: user.id, name: user.name, email: user.email, role: user.role }
         });
-
     } catch (err) {
         console.error("Login error:", err);
         res.status(500).json({ message: "An internal server error occurred." });
     }
 });
 
+app.post('/change-password', async (req, res) => {
+    const { email, currentPassword, newPassword } = req.body;
+    if (!email || !currentPassword || !newPassword) {
+        return res.status(400).json({ message: "All fields are required." });
+    }
 
-// --- EXISTING VENDOR ROUTES ---
+    try {
+        const findUserSql = "SELECT * FROM users WHERE email = ?";
+        const [rows] = await pool.query(findUserSql, [email]);
+        if (rows.length === 0) {
+            return res.status(404).json({ message: "User not found." });
+        }
+        const user = rows[0];
+        const passwordMatch = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!passwordMatch) {
+            return res.status(401).json({ message: "Incorrect current password." });
+        }
+        const saltRounds = 10;
+        const newPasswordHash = await bcrypt.hash(newPassword, saltRounds);
+        const updateSql = "UPDATE users SET password_hash = ? WHERE email = ?";
+        await pool.query(updateSql, [newPasswordHash, email]);
+        res.status(200).json({ message: "Password updated successfully!" });
+    } catch (err) {
+        console.error("Error changing password:", err);
+        res.status(500).json({ message: "An internal server error occurred." });
+    }
+});
 
 app.get('/vendors', async (req, res) => {
     try {
-        const [rows] = await pool.query("SELECT * FROM vendors ORDER BY name");
+        const [rows] = await pool.query("SELECT * FROM vendors ORDER BY created_at DESC");
         res.status(200).json(rows);
     } catch (err) {
         console.error("Error fetching vendors:", err);
-        res.status(500).send({ message: "Failed to fetch vendors." });
+        res.status(500).json({ message: "Failed to fetch vendors." });
     }
 });
 
 app.post('/add-vendor', async (req, res) => {
-    const { name, walletAddress, milestoneGoal, rewardAmount } = req.body;
-    if (!name || !walletAddress || !milestoneGoal || !rewardAmount) {
-        return res.status(400).send({ message: "All vendor fields are required." });
+    const { name, vendorEmail, walletAddress, milestoneGoal, rewardAmount } = req.body;
+    if (!name || !vendorEmail || !walletAddress || !milestoneGoal || !rewardAmount) {
+        return res.status(400).json({ message: "All vendor fields are required." });
     }
+    
+    let connection;
     try {
-        const sql = "INSERT INTO vendors (name, wallet_address, milestone_goal, reward_amount) VALUES (?, ?, ?, ?)";
-        const [result] = await pool.query(sql, [name, walletAddress, milestoneGoal, rewardAmount]);
-        res.status(201).json({ message: "Vendor added successfully!", vendorId: result.insertId });
+        connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        const vendorSql = "INSERT INTO vendors (name, wallet_address, milestone_goal, reward_amount) VALUES (?, ?, ?, ?)";
+        const [vendorResult] = await connection.query(vendorSql, [name, walletAddress, milestoneGoal, rewardAmount]);
+        
+        const defaultPassword = '123';
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(defaultPassword, saltRounds);
+        const userSql = "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)";
+        await connection.query(userSql, [name, vendorEmail, passwordHash, 'producer']);
+
+        if (contract) {
+            const rewardInWei = ethers.parseEther(rewardAmount.toString());
+            const tx = await contract.addVendor(walletAddress, milestoneGoal, rewardInWei);
+            await tx.wait();
+        }
+
+        await connection.commit();
+        res.status(201).json({ message: "Vendor and user account created successfully!", vendorId: vendorResult.insertId });
+
     } catch (err) {
+        if (connection) await connection.rollback();
         console.error("Error adding vendor:", err);
-        res.status(500).send({ message: "Failed to add vendor." });
+        if (err.code === 'ER_DUP_ENTRY') {
+             return res.status(409).json({ message: "A user with this email or a vendor with this wallet already exists." });
+        }
+        res.status(500).json({ message: "Failed to add vendor due to a server or blockchain error." });
+    } finally {
+        if (connection) connection.release();
     }
 });
 
@@ -181,38 +244,7 @@ app.get('/vendors/:vendorId/progress', async (req, res) => {
         res.status(200).json({ totalProgress });
     } catch (err) {
         console.error(`Error fetching progress for vendor ${vendorId}:`, err);
-        res.status(500).send({ message: "Failed to fetch progress." });
-    }
-});
-
-app.post('/vendors/:vendorId/progress', async (req, res) => {
-    const { vendorId } = req.params;
-    const { newProgress } = req.body;
-
-    if (!newProgress || isNaN(newProgress) || newProgress <= 0) {
-        return res.status(400).send({ message: "Invalid progress value." });
-    }
-
-    try {
-        const sql = "INSERT INTO progress_logs (vendor_id, progress, timestamp) VALUES (?, ?, ?)";
-        const timestamp = new Date();
-        await pool.query(sql, [vendorId, newProgress, timestamp]);
-        res.status(200).json({ message: "Progress updated successfully!" });
-    } catch (err) {
-        console.error(`Error updating progress for vendor ${vendorId}:`, err);
-        res.status(500).send({ message: "Failed to update progress." });
-    }
-});
-
-app.post('/vendors/:vendorId/payout', async (req, res) => {
-    const { vendorId } = req.params;
-    try {
-        const sql = "UPDATE vendors SET is_paid = TRUE WHERE id = ?";
-        await pool.query(sql, [vendorId]);
-        res.status(200).json({ message: "Payout processed successfully!" });
-    } catch (err) {
-        console.error(`Error processing payout for vendor ${vendorId}:`, err);
-        res.status(500).send({ message: "Failed to process payout." });
+        res.status(500).json({ message: "Failed to fetch progress." });
     }
 });
 
@@ -221,18 +253,23 @@ app.post('/reset', async (req, res) => {
         await pool.query("SET FOREIGN_KEY_CHECKS = 0");
         await pool.query("TRUNCATE TABLE progress_logs");
         await pool.query("TRUNCATE TABLE vendors");
-        await pool.query("TRUNCATE TABLE users"); // Also clear users on reset
+        await pool.query("TRUNCATE TABLE users");
         await pool.query("SET FOREIGN_KEY_CHECKS = 1");
         console.log("Simulation reset. All tables cleared.");
-        res.status(200).send({ message: "Simulation reset successfully." });
+        res.status(200).json({ message: "Simulation reset successfully." });
     } catch (err) {
         console.error("Error resetting simulation:", err);
-        res.status(500).send({ message: "Failed to reset." });
+        res.status(500).json({ message: "Failed to reset." });
     }
 });
 
-setupDatabase().then(() => {
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+setup().then(() => {
     app.listen(PORT, () => {
         console.log(`Server is live and listening on http://localhost:${PORT}`);
     });
 });
+
